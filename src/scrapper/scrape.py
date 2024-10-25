@@ -154,9 +154,9 @@ class ScrapeReviews:
 
     def get_review_data(self) -> pd.DataFrame:
         try:
-            # search_string = self.request.form["content"].replace(" ", "-")
-            # no_of_products = int(self.request.form["prod_no"])
             product_urls = self.scrape_product_urls(product_name=self.product_name)
+            if not product_urls or len(product_urls) < self.no_of_products:
+                raise ValueError("Not enough product URLs retrieved")
             product_details = []
             review_len = 0
             while review_len < self.no_of_products:
@@ -164,16 +164,19 @@ class ScrapeReviews:
                 review = self.extract_reviews(product_url)
                 if review:
                     product_detail = self.extract_products(review)
-                    product_details.append(product_detail)
-                    review_len += 1
+                    if isinstance(product_detail, pd.DataFrame):
+                        product_details.append(product_detail)
+                        review_len += 1
+                    else:
+                        raise TypeError("Expected a DataFrame from extract_products")
                 else:
                     product_urls.pop(review_len)
-            self.driver.quit()
+            if not product_details:
+                raise ValueError("No product details were extracted")
             data = pd.concat(product_details, axis=0)
             data.to_csv("data.csv", index=False)
             return data
-            # columns = data.columns
-            # values = [[data.loc[i, col] for col in data.columns ] for i in range(len(data)) ]
-            # return columns, values
         except Exception as e:
+            print(f"Error during review data extraction: {str(e)}")  # More informative for debugging
             raise CustomException(e, sys)
+
