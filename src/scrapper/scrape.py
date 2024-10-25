@@ -10,12 +10,15 @@ from urllib.parse import quote
 class ScrapeReviews:
     def __init__(self, product_name:str, no_of_products:int):
         options = Options()
-        # options.add_argument("--no-sandbox")
-        # options.add_argument("--disable-dev-shm-usage")
-        # options.add_argument('--headless')
+        options.headless = True  # Running in headless mode
+        options.add_argument('--no-sandbox')  # Bypass OS security model
+        options.add_argument('--disable-dev-shm-usage')  # Overcome limited resource problems
         
         # Start a new Chrome browser session
-        self.driver = webdriver.Chrome(options=options)
+        try:
+            self.driver = webdriver.Chrome(options=options)
+        except Exception as e:
+            print(f"Failed to initialize ChromeDriver: {e}")
 
         self.product_name = product_name
         self.no_of_products = no_of_products
