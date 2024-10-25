@@ -19,6 +19,7 @@ class ScrapeReviews:
             self.driver = webdriver.Chrome(options=options)
         except Exception as e:
             print(f"Failed to initialize ChromeDriver: {e}")
+            raise CustomException(e, sys)
 
         self.product_name = product_name
         self.no_of_products = no_of_products
